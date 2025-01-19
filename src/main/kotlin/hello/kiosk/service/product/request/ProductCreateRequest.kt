@@ -9,7 +9,8 @@ data class ProductCreateRequest(
     val type: ProductType,
     val sellingStatus: ProductSellingStatus,
     val name: String,
-    val price: Int
+    val price: Int,
+    val initialStock: Int? = null
 
 ) {
     fun toEntity(nextProductNumber: String): Product {
