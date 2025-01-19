@@ -4,9 +4,6 @@ import hello.kiosk.domain.BaseEntity
 import hello.kiosk.domain.orderProduct.OrderProduct
 import hello.kiosk.domain.product.Product
 import jakarta.persistence.*
-import lombok.AccessLevel
-import lombok.Getter
-import lombok.NoArgsConstructor
 import java.time.LocalDateTime
 
 @Entity
@@ -30,18 +27,30 @@ class Order(
 ) : BaseEntity() {
 
     companion object {
-        fun create(products: List<Product>, registeredDateTime: LocalDateTime): Order {
+        fun create(products: List<Product>,
+                   productQuantity: Map<String, Int>,
+                   registeredDateTime: LocalDateTime
+        ): Order {
             val order = Order(
                 orderStatus = OrderStatus.INIT,
                 registeredDateTime = registeredDateTime
             )
-            order.totalPrice = calculateTotalPrice(products)
-            order.orderProducts = products.map { OrderProduct(order = order, product = it) }.toMutableList()
+            order.totalPrice = calculateTotalPrice(products, productQuantity)
+            order.orderProducts = products.map { product ->
+                val quantity = productQuantity[product.productNumber]?:1
+                OrderProduct(order = order, product = product, quantity = quantity)
+            }.toMutableList()
+
             return order
         }
 
-        private fun calculateTotalPrice(products: List<Product>): Int {
-            return products.sumOf { it.price }
+        private fun calculateTotalPrice(products: List<Product>,
+                                        productQuantity: Map<String, Int>
+        ): Int {
+            return products.sumOf { product ->
+                val quantity = productQuantity[product.productNumber]?:1
+                product.price * quantity
+            }
         }
     }
 
