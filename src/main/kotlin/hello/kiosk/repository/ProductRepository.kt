@@ -11,6 +11,11 @@ interface ProductRepository : JpaRepository<Product, Long> {
 
     fun findAllByProductNumberIn(productNumbers: Collection<String>): List<Product>
 
-    @Query(value = "select p.product_number from Product p order by id desc limit 1", nativeQuery = true)
-    fun findLatestProduct(): String?
+    @Query(value = "select p.product_number from Product p " +
+            "where p.product_number LIKE CONCAT(:prefix, '-%')" +
+            "order by id desc limit 1", nativeQuery = true)
+    fun findLatestProduct(prefix: String): String?
+
+    @Query(value = "select * from Product p where p.product_number like %:prefix%", nativeQuery = true)
+    fun findByProductNumberByPrefix(prefix: String): List<Product>
 }
