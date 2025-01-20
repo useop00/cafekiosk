@@ -1,6 +1,7 @@
 package hello.kiosk.domain.stock
 
 import hello.kiosk.domain.BaseEntity
+import hello.kiosk.exception.OutOfStock
 import jakarta.persistence.*
 
 @Entity
@@ -30,7 +31,7 @@ class Stock (
 
     fun decreaseQuantity(quantity: Int) {
         if (isQuantityLessThan(quantity)) {
-            throw IllegalArgumentException("재고가 부족합니다.")
+            throw OutOfStock("재고가 부족합니다.")
         }
         this.quantity -= quantity
     }

@@ -2,6 +2,8 @@ package hello.kiosk.service.order
 
 import hello.kiosk.domain.order.Order
 import hello.kiosk.domain.product.Product
+import hello.kiosk.exception.NotFoundProduct
+import hello.kiosk.exception.OutOfStock
 import hello.kiosk.repository.OrderRepository
 import hello.kiosk.repository.ProductRepository
 import hello.kiosk.repository.StockRepository
@@ -31,33 +33,32 @@ class OrderService(
         return OrderResponse.of(savedOrder)
     }
 
+    private fun findProductsBy(productNumbers: List<String>): List<Product> {
+        val products = productRepository.findAllByProductNumberIn(productNumbers)
+        val productMap = products.associateBy { it.productNumber }
+
+        return productNumbers.map {
+            productMap[it] ?: throw NotFoundProduct("상품을 찾을 수 없습니다.")
+        }
+    }
+
     private fun reduceStockBy(
         products: List<Product>,
         request: OrderRequest
     ) {
         for (product in products) {
             if (product.type.needStockCheck()) {
-                val orderQty = request.productQuantities[product.productNumber] ?: 1
-                decreaseStock(product.productNumber, orderQty)
+                val requestQuantity = request.productQuantities[product.productNumber] ?: 1
+                decreaseStock(product.productNumber, requestQuantity)
             }
         }
     }
 
     private fun decreaseStock(productNumber: String, requestQuantity: Int) {
         val stock = stockRepository.findByProductNumber(productNumber)
-            ?: throw IllegalArgumentException("해당 상품의 재고가 없습니다.")
+            ?: throw OutOfStock("해당 상품의 재고가 없습니다.")
 
         stock.decreaseQuantity(requestQuantity)
         stockRepository.save(stock)
     }
-
-    private fun findProductsBy(productNumbers: List<String>): List<Product> {
-        val products = productRepository.findAllByProductNumberIn(productNumbers)
-        val productMap = products.associateBy { it.productNumber }
-
-        return productNumbers.map {
-            productMap[it] ?: throw IllegalArgumentException("해당 상품이 존재하지 않습니다: $it")
-        }
-    }
-
 }
