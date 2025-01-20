@@ -2,6 +2,8 @@ package hello.kiosk.service.order
 
 import hello.kiosk.domain.product.ProductSellingStatus.SELLING
 import hello.kiosk.domain.product.ProductType.*
+import hello.kiosk.exception.NotFoundProduct
+import hello.kiosk.exception.OutOfStock
 import hello.kiosk.repository.StockRepository
 import hello.kiosk.service.order.request.OrderRequest
 import hello.kiosk.service.product.ProductService
@@ -63,6 +65,22 @@ class OrderServiceTest @Autowired constructor(
  }
 
  @Test
+ fun `찾을 수 없는 상품이면 예외를 던진다`() {
+  //given
+    val orderRequest = OrderRequest(
+    productNumber = listOf("A-001"),
+    productQuantities = mapOf("A-001" to 1)
+    )
+
+  //expect
+  assertThrows<NotFoundProduct> {
+   orderService.crateOrder(orderRequest, LocalDateTime.now())
+  }.also {
+    assertThat(it.message).isEqualTo("상품을 찾을 수 없습니다.")
+  }
+ }
+
+ @Test
  fun `BOTTLE, DESSERT 타입 상품은 주문 시 재고가 차감된다`() {
   //given
   val request = ProductCreateRequest(
@@ -107,10 +125,10 @@ class OrderServiceTest @Autowired constructor(
   )
 
   // expect
-  assertThrows<IllegalArgumentException> {
+  assertThrows<OutOfStock> {
    orderService.crateOrder(orderRequest, LocalDateTime.now())
   }.also {
-   assertThat(it.message).contains("재고가 부족합니다.")
+   assertThat(it.message).isEqualTo("재고가 부족합니다.")
   }
 
  }
