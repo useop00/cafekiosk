@@ -26,7 +26,7 @@ class OrderServiceTest @Autowired constructor(
 
  @Test
  fun `주문을 생성한다`() {
-     //given
+  //given
   val product1 = ProductCreateRequest(
    type = COFFEE,
    sellingStatus = SELLING,
@@ -46,11 +46,11 @@ class OrderServiceTest @Autowired constructor(
 
 
   val orderRequest = OrderRequest(
-        productNumber = listOf(saveProduct1.productNumber, saveProduct2.productNumber),
-        productQuantities = mapOf(
-         saveProduct1.productNumber to 2,
-         saveProduct2.productNumber to 3)
-    )
+   productNumber = listOf(saveProduct1.productNumber, saveProduct2.productNumber),
+   productQuantities = mapOf(
+    saveProduct1.productNumber to 2,
+    saveProduct2.productNumber to 3)
+  )
 
   //when
   val orderResponse = orderService.crateOrder(orderRequest, LocalDateTime.now())
@@ -129,8 +129,8 @@ class OrderServiceTest @Autowired constructor(
 
   //when
   val order = OrderRequest(
-    productNumber = listOf(product.productNumber),
-    productQuantities = mapOf(product.productNumber to 4)
+   productNumber = listOf(product.productNumber),
+   productQuantities = mapOf(product.productNumber to 4)
   )
 
   val executor = Executors.newFixedThreadPool(2)
