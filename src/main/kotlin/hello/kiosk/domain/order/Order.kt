@@ -3,6 +3,7 @@ package hello.kiosk.domain.order
 import hello.kiosk.domain.BaseEntity
 import hello.kiosk.domain.orderProduct.OrderProduct
 import hello.kiosk.domain.product.Product
+import hello.kiosk.domain.user.User
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -21,19 +22,23 @@ class Order(
     var registeredDateTime: LocalDateTime = LocalDateTime.now(),
 
     @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL])
-    var orderProducts: MutableList<OrderProduct> = mutableListOf()
+    var orderProducts: MutableList<OrderProduct> = mutableListOf(),
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    var user: User,
 
 ) : BaseEntity() {
 
     companion object {
         fun create(products: List<Product>,
                    productQuantity: Map<String, Int>,
-                   registeredDateTime: LocalDateTime
+                   registeredDateTime: LocalDateTime,
+                   user:User
         ): Order {
             val order = Order(
                 orderStatus = OrderStatus.INIT,
-                registeredDateTime = registeredDateTime
+                registeredDateTime = registeredDateTime,
+                user = user
             )
             order.totalPrice = calculateTotalPrice(products, productQuantity)
             order.orderProducts = products.map { product ->
@@ -52,9 +57,5 @@ class Order(
                 product.price * quantity
             }
         }
-    }
-
-    fun changeOrderStatus(orderStatus: OrderStatus) {
-        this.orderStatus = orderStatus
     }
 }
