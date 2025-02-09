@@ -11,7 +11,7 @@ import hello.kiosk.service.user.response.UserResponse
 import org.springframework.stereotype.Service
 
 @Service
-class UserService (
+class UserService(
     private val userRepository: UserRepository,
     private val jwtProvider: JwtProvider
 ) {
@@ -26,8 +26,8 @@ class UserService (
     }
 
     fun login(request: LoginRequest): LoginResponse {
-        val user = userRepository.findByUsername(request.username).firstOrNull()
-            ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
+        val user = userRepository.findByUsername(request.username) ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
+
 
         if (isNotEqualsPassword(request, user)) {
             throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
