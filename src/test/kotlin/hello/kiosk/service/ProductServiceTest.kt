@@ -22,8 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 @Transactional
 class ProductServiceTest @Autowired constructor(
     private var productRepository: ProductRepository,
-    private var productService: ProductService,
-    private var stockRepository: StockRepository
+    private var productService: ProductService
 ) {
 
     @DisplayName("상품을 저장한다.")
@@ -57,12 +56,12 @@ class ProductServiceTest @Autowired constructor(
             )
     }
 
-    @DisplayName("원하는 판매상태를 가진 상품들을 조회한다.")
+    @DisplayName("판매중인 상품들을 조회한다.")
     @Test
     fun findSellingProducts() {
         //given
         val product1 = createProduct("A-001",COFFEE, SELLING, "아메리카노", 3000)
-        val product2 = createProduct("B-001",BOTTLE, SELLING, "카페라떼", 5000)
+        val product2 = createProduct("B-001",BOTTLE, SELLING, "콜라", 5000)
         val product3 = createProduct("C-001",DESSERT, SOLD_OUT, "치즈케이크", 7000)
         productRepository.saveAll(listOf(product1, product2, product3))
 
@@ -73,8 +72,8 @@ class ProductServiceTest @Autowired constructor(
         assertThat(sellingProducts).hasSize(2)
             .extracting("productNumber","type", "sellingStatus", "name", "price")
             .containsExactlyInAnyOrder(
-                tuple("001",COFFEE, SELLING, "아메리카노", 3000),
-                tuple("002",BOTTLE, SELLING, "카페라떼", 5000)
+                tuple("A-001",COFFEE, SELLING, "아메리카노", 3000),
+                tuple("B-001",BOTTLE, SELLING, "콜라", 5000)
             )
     }
 
@@ -121,6 +120,38 @@ class ProductServiceTest @Autowired constructor(
 
         //then
         assertThat(response.productNumber).isEqualTo("A-002")
+    }
+
+    @DisplayName("첫번째 상품번호를 생성한다.")
+    @Test
+    fun firstProductNumber() {
+        //given
+        val request1 = ProductCreateRequest(
+            type = COFFEE,
+            sellingStatus = SELLING,
+            name = "아메리카노",
+            price = 3000
+        )
+
+        val request2 = ProductCreateRequest(
+            type = BOTTLE,
+            sellingStatus = SELLING,
+            name = "콜라",
+            price = 3000
+        )
+
+        //when
+        val response1 = productService.saveProduct(request1)
+        val response2 = productService.saveProduct(request2)
+
+        //then
+        val products = productRepository.findAll()
+        assertThat(products).hasSize(2)
+            .extracting("productNumber", "type", "sellingStatus", "name", "price")
+            .containsExactlyInAnyOrder(
+                tuple("A-001", COFFEE, SELLING, "아메리카노", 3000),
+                tuple("B-001", BOTTLE, SELLING, "콜라", 3000)
+            )
 
     }
 
@@ -145,54 +176,12 @@ class ProductServiceTest @Autowired constructor(
             )
     }
 
-    @Test
-    fun `BOTTLE 타입 상품 생성 시 재고도 함께 생성된다`() {
-        //given
-        val request = ProductCreateRequest(
-            type = BOTTLE,
-            sellingStatus = SELLING,
-            name = "콜드브루 병",
-            price = 5000,
-            initialStock = 10
-        )
-
-        //when
-        val response = productService.saveProduct(request)
-
-        //then
-        val savedProduct = productRepository.findByProductNumberByPrefix(response.productNumber)
-        assertThat(savedProduct).isNotNull
-
-        val stock = stockRepository.findByProductNumber(response.productNumber)
-        assertThat(stock!!.quantity).isEqualTo(10)
-    }
-
-    @Test
-    fun `COFFEE 타입 상품은 재고가 생성되지 않는다`() {
-        //given
-        val request = ProductCreateRequest(
-            type = COFFEE,
-            sellingStatus = SELLING,
-            name = "아메리카노",
-            price = 5000,
-            initialStock = 10
-        )
-
-        //when
-        val response = productService.saveProduct(request)
-
-        //then
-        val stock = stockRepository.findByProductNumber(response.productNumber)
-        assertThat(stock).isNull()
-    }
-
     private fun createProduct(
         productNumber: String,
         type: ProductType,
         sellingStatus: ProductSellingStatus,
         name: String,
-        price: Int,
-        initialStock: Int? = null
+        price: Int
     ): Product {
         return Product.create(
             productNumber = productNumber,
