@@ -8,12 +8,14 @@ import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.log
 import kotlin.test.Test
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class UserServiceTest @Autowired constructor(
     private val userService: UserService,
     private val userRepository: UserRepository
