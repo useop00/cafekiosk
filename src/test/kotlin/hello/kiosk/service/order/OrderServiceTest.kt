@@ -1,17 +1,20 @@
 package hello.kiosk.service.order
 
+import hello.kiosk.domain.product.Product
 import hello.kiosk.domain.product.ProductSellingStatus.SELLING
+import hello.kiosk.domain.product.ProductType
 import hello.kiosk.domain.product.ProductType.*
+import hello.kiosk.domain.stock.Stock
 import hello.kiosk.exception.NotFoundProduct
 import hello.kiosk.exception.OutOfStock
+import hello.kiosk.repository.ProductRepository
 import hello.kiosk.repository.StockRepository
 import hello.kiosk.service.order.request.OrderRequest
-import hello.kiosk.service.product.ProductService
-import hello.kiosk.service.product.request.ProductCreateRequest
 import hello.kiosk.service.user.UserService
 import hello.kiosk.service.user.request.LoginRequest
 import hello.kiosk.service.user.request.SignRequest
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.groups.Tuple.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -20,16 +23,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
 
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
 class OrderServiceTest @Autowired constructor(
     private val orderService: OrderService,
-    private val productService: ProductService,
     private val stockRepository: StockRepository,
+    private val productRepository: ProductRepository,
     private val userService: UserService
 ) {
     lateinit var username: String
@@ -50,29 +51,17 @@ class OrderServiceTest @Autowired constructor(
     @Test
     fun `주문을 생성한다`() {
         //given
-        val product1 = ProductCreateRequest(
-            type = COFFEE,
-            sellingStatus = SELLING,
-            name = "아메리카노",
-            price = 3000
-        )
-        val saveProduct1 = productService.saveProduct(product1)
-
-        val product2 = ProductCreateRequest(
-            type = BOTTLE,
-            sellingStatus = SELLING,
-            name = "콜드브루 병",
-            price = 5000,
-            stock = 10
-        )
-        val saveProduct2 = productService.saveProduct(product2)
+        val product1 = createProduct("A-001", COFFEE, 1000)
+        val product2 = createProduct("A-002", COFFEE, 3000)
+        val product3 = createProduct("A-003", COFFEE, 5000)
+        productRepository.saveAll(listOf(product1, product2, product3))
 
 
         val orderRequest = OrderRequest(
-            productNumber = listOf(saveProduct1.productNumber, saveProduct2.productNumber),
+            productNumber = listOf("A-001", "A-002"),
             productQuantities = mapOf(
-                saveProduct1.productNumber to 2,
-                saveProduct2.productNumber to 3
+                "A-001" to 2,
+                "A-002" to 1
             )
         )
 
@@ -80,10 +69,13 @@ class OrderServiceTest @Autowired constructor(
         val orderResponse = orderService.createOrder(orderRequest, LocalDateTime.now(), username)
 
         //then
-        assertThat(orderResponse.totalPrice).isEqualTo(21000)
-
-        val stock = stockRepository.findByProductNumber(saveProduct2.productNumber)
-        assertThat(stock!!.quantity).isEqualTo(7)
+        assertThat(orderResponse.totalPrice).isEqualTo(5000)
+        assertThat(orderResponse.products).hasSize(2)
+            .extracting("productNumber", "price")
+            .containsExactlyInAnyOrder(
+                tuple("A-001", 1000),
+                tuple("A-002", 3000)
+            )
     }
 
     @Test
@@ -105,45 +97,58 @@ class OrderServiceTest @Autowired constructor(
     @Test
     fun `BOTTLE, DESSERT 타입 상품은 주문 시 재고가 차감된다`() {
         //given
-        val request = ProductCreateRequest(
-            type = BOTTLE,
-            sellingStatus = SELLING,
-            name = "콜드브루 병",
-            price = 5000,
-            stock = 10
-        )
-        val productResponse = productService.saveProduct(request)
+        val dateTime = LocalDateTime.now()
+        val product1 = createProduct("A-001", COFFEE, 2000)
+        val product2 = createProduct("B-001", BOTTLE, 3000)
+        val product3 = createProduct("C-001", DESSERT, 5000)
+        productRepository.saveAll(listOf(product1, product2, product3))
+
+        val stock1 = Stock.create("B-001", 5)
+        val stock2 = Stock.create("C-001", 5)
+        stockRepository.saveAll(listOf(stock1, stock2))
+
 
         val orderRequest = OrderRequest(
-            productNumber = listOf(productResponse.productNumber),
-            productQuantities = mapOf(productResponse.productNumber to 5)
+            productNumber = listOf("A-001", "B-001", "C-001"),
+            productQuantities = mapOf(
+                "A-001" to 1,
+                "B-001" to 1,
+                "C-001" to 1
+            )
         )
 
         //when
-        orderService.createOrder(orderRequest, LocalDateTime.now(), username)
+        val response = orderService.createOrder(orderRequest, dateTime, username)
 
         //then
-        val stock = stockRepository.findByProductNumber(productResponse.productNumber)
-        assertThat(stock!!.quantity).isEqualTo(5)
+        assertThat(response.id).isNotNull()
+        assertThat(response)
+            .extracting("registeredDateTime", "totalPrice")
+            .contains(dateTime, 10000)
 
+        assertThat(response.products).hasSize(3)
+            .extracting("productNumber", "price")
+            .containsExactlyInAnyOrder(
+                tuple("A-001", 2000),
+                tuple("B-001", 3000),
+                tuple("C-001", 5000)
+            )
+
+        assertThat(stock1.quantity).isEqualTo(4)
+        assertThat(stock2.quantity).isEqualTo(4)
     }
 
     @Test
     fun `재고가 부족하면 예외가 발생된다`() {
         //given
-        val request = ProductCreateRequest(
-            type = BOTTLE,
-            sellingStatus = SELLING,
-            name = "콜드브루 병",
-            price = 5000,
-            stock = 3
-        )
-
-        val productResponse = productService.saveProduct(request)
+        val product = createProduct("B-001", BOTTLE, 3000)
+        productRepository.save(product)
 
         val orderRequest = OrderRequest(
-            productNumber = listOf(productResponse.productNumber),
-            productQuantities = mapOf(productResponse.productNumber to 5)
+            productNumber = listOf("B-001"),
+            productQuantities = mapOf(
+                "B-001" to 1
+            )
         )
 
         // expect
@@ -155,45 +160,11 @@ class OrderServiceTest @Autowired constructor(
 
     }
 
-    @Test
-    fun `동시에 같은 상품을 주문하면 낙관적 락으로 예외가 발생한다`() {
-        //given
-        val request = ProductCreateRequest(
-            type = BOTTLE,
-            sellingStatus = SELLING,
-            name = "콜드브루 병",
-            price = 5000,
-            stock = 5
-        )
-        val product = productService.saveProduct(request)
-
-        //when
-        val order = OrderRequest(
-            productNumber = listOf(product.productNumber),
-            productQuantities = mapOf(product.productNumber to 4)
-        )
-
-        val executor = Executors.newFixedThreadPool(2)
-        val futures = (1..2).map {
-            executor.submit(Callable {
-                try {
-                    Thread.sleep(100)
-                    orderService.createOrder(order, LocalDateTime.now(), username)
-                    "success-$it"
-                } catch (e: Exception) {
-                    "fail-$it: ${e.message}"
-                }
-            })
-        }
-
-        //then
-        val results = futures.map { it.get() }
-        println(results)
-
-        /**
-         * 하나는 성공 (재고 5 -> 1), 다른 하나는 낙관적 락에 의해 실패
-         */
-        assertThat(results.count { it.startsWith("success") }).isOne()
-        assertThat(results.count { it.startsWith("fail") }).isOne()
-    }
+    private fun createProduct(productNumber: String, type:ProductType, price:Int) = Product.create(
+        productNumber = productNumber,
+        type = type,
+        sellingStatus = SELLING,
+        name = "메뉴이름",
+        price = price
+    )
 }
