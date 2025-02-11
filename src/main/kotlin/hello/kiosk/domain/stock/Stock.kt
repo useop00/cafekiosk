@@ -13,7 +13,7 @@ class Stock (
     var quantity: Int = 0,
 
     @Version
-    var version: Long? = null
+    var version: Long = 0
 
 ): BaseEntity(){
     companion object {
@@ -31,8 +31,12 @@ class Stock (
 
     fun decreaseQuantity(quantity: Int) {
         if (isQuantityLessThan(quantity)) {
-            throw OutOfStock("재고가 부족합니다.")
+            throw OutOfStock("재고가 부족합니다. (남은 재고: ${this.quantity})")
         }
         this.quantity -= quantity
+    }
+
+    fun increaseQuantity(quantity: Int) {
+        this.quantity += quantity
     }
 }
