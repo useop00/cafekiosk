@@ -11,9 +11,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class ProductService (
-    private val productRepository: ProductRepository,
-    private val stockRepository: StockRepository
+class ProductService(
+    private val productRepository: ProductRepository
 ) {
 
     @Transactional
@@ -24,8 +23,6 @@ class ProductService (
         val product = request.toEntity(nextProductNumber)
         val savedProduct = productRepository.save(product)
 
-        stockOfProducts(request, nextProductNumber)
-
         return ProductResponse.of(savedProduct)
     }
 
@@ -34,21 +31,11 @@ class ProductService (
         return products.map { ProductResponse.of(it) }
     }
 
-    fun getSellingProducts():List<ProductResponse>{
+    fun getSellingProducts(): List<ProductResponse> {
         val products = productRepository.findAllBySellingStatusIn(forDisplay())
         return products.map { ProductResponse.of(it) }
     }
 
-    private fun stockOfProducts(
-        request: ProductCreateRequest,
-        nextProductNumber: String
-    ) {
-        if (request.type.needStockCheck()) {
-            val initQuantity = request.initialStock ?: 0
-            val stock = Stock.create(nextProductNumber, initQuantity)
-            stockRepository.save(stock)
-        }
-    }
 
     private fun createNextProductNumber(prefix: String): String {
         val latest = productRepository.findLatestProduct(prefix) ?: return "$prefix-001"
