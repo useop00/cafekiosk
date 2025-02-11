@@ -31,7 +31,7 @@ class OrderService(
 
         val user = userRepository.findByUsername(username) ?: throw NotFoundUser("사용자를 찾을 수 없습니다.")
 
-        reduceStockBy(products, request)
+        deductStockQuantity(products, request.productQuantities)
 
         val order = Order.create(products, request.productQuantities, registeredDateTime, user)
         val savedOrder = orderRepository.save(order)
@@ -43,28 +43,51 @@ class OrderService(
         val products = productRepository.findAllByProductNumberIn(productNumbers)
         val productMap = products.associateBy { it.productNumber }
 
-        return productNumbers.map {
-            productMap[it] ?: throw NotFoundProduct("상품을 찾을 수 없습니다.")
+        return productNumbers.map { productNumber ->
+            productMap[productNumber] ?: throw NotFoundProduct("상품을 찾을 수 없습니다.")
         }
     }
 
-    private fun reduceStockBy(
-        products: List<Product>,
-        request: OrderRequest
-    ) {
-        for (product in products) {
-            if (product.type.needStockCheck()) {
-                val requestQuantity = request.productQuantities[product.productNumber] ?: 1
-                decreaseStock(product.productNumber, requestQuantity)
+    private fun deductStockQuantity(products: List<Product>, productQuantities: Map<String, Int>) {
+        val stockProductNumbers = extractStockProductNumbers(products)
+
+        val stockMap = createStockMapBy(stockProductNumbers)
+
+        val productCountingMap = createCountingMap(stockProductNumbers, productQuantities)
+
+        for (stockProductNumber in stockProductNumbers.toSet()) {
+            val stock = stockMap[stockProductNumber] ?: throw OutOfStock("재고가 부족합니다.")
+            val quantity = productCountingMap[stockProductNumber]?.toInt() ?: 0
+
+            if (stock.isQuantityLessThan(quantity)) {
+                throw OutOfStock("재고가 부족합니다. 상품번호: $stockProductNumber")
             }
+            stock.decreaseQuantity(quantity)
         }
     }
 
-    private fun decreaseStock(productNumber: String, requestQuantity: Int) {
-        val stock = stockRepository.findByProductNumber(productNumber)
-            ?: throw OutOfStock("해당 상품의 재고가 없습니다.")
+    private fun extractStockProductNumbers(products: List<Product>): List<String> {
+        return products
+            .filter { it.type.needStockCheck() }
+            .map { it.productNumber }
+    }
 
-        stock.decreaseQuantity(requestQuantity)
-        stockRepository.save(stock)
+    private fun createStockMapBy(stockProductNumbers: List<String>): Map<String, Stock> {
+        val stocks = stockRepository.findAllByProductNumberIn(stockProductNumbers)
+        return stocks.associateBy { it.productNumber }
+    }
+
+    private fun createCountingMap(
+        stockProductNumbers: List<String>,
+        productQuantities: Map<String, Int>
+    ): Map<String, Long> {
+        val countingMap = mutableMapOf<String, Long>()
+
+        stockProductNumbers.forEach { productNumber ->
+            val quantity = productQuantities[productNumber]?.toLong() ?: 1
+            countingMap[productNumber] = (countingMap[productNumber] ?: 0L) + quantity
+        }
+
+        return countingMap
     }
 }
