@@ -2,7 +2,7 @@ package hello.kiosk.service.order.response
 
 import hello.kiosk.domain.order.Order
 import hello.kiosk.domain.order.OrderStatus
-import hello.kiosk.domain.orderProduct.OrderProduct
+import hello.kiosk.service.product.response.ProductResponse
 import java.time.LocalDateTime
 
 data class OrderResponse(
@@ -11,7 +11,7 @@ data class OrderResponse(
     var orderStatus: OrderStatus = OrderStatus.INIT,
     var totalPrice: Int,
     var registeredDateTime: LocalDateTime,
-    var orderProducts: MutableList<OrderProduct>
+    var products: List<ProductResponse>
 ) {
     companion object {
         fun of(order: Order): OrderResponse {
@@ -20,7 +20,9 @@ data class OrderResponse(
                 orderStatus = order.orderStatus,
                 totalPrice = order.totalPrice,
                 registeredDateTime = order.registeredDateTime,
-                orderProducts = order.orderProducts
+                products = order.orderProducts.map { orderProduct ->
+                    ProductResponse.of(orderProduct.product)
+                }
             )
         }
     }
