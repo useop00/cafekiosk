@@ -10,12 +10,32 @@
       "description": "Generated server url"
     }
   ],
+  "tags": [
+    {
+      "name": "Order",
+      "description": "주문 API"
+    },
+    {
+      "name": "Product",
+      "description": "상품 API"
+    },
+    {
+      "name": "User",
+      "description": "사용자 API"
+    },
+    {
+      "name": "Stock",
+      "description": "재고 API"
+    }
+  ],
   "paths": {
     "/stocks": {
       "get": {
         "tags": [
-          "stock-controller"
+          "Stock"
         ],
+        "summary": "재고 조회",
+        "description": "재고를 조회합니다.",
         "operationId": "getStocks",
         "responses": {
           "200": {
@@ -42,8 +62,10 @@
       },
       "post": {
         "tags": [
-          "stock-controller"
+          "Stock"
         ],
+        "summary": "재고 등록",
+        "description": "상품 타입이 BOTTLE, DESSERT일 경우 재고를 등록합니다.",
         "operationId": "createStock",
         "requestBody": {
           "content": {
@@ -82,8 +104,10 @@
     "/products": {
       "post": {
         "tags": [
-          "product-controller"
+          "Product"
         ],
+        "summary": "상품 등록",
+        "description": "상품을 등록합니다.",
         "operationId": "createProduct",
         "requestBody": {
           "content": {
@@ -122,8 +146,10 @@
     "/orders": {
       "post": {
         "tags": [
-          "order-controller"
+          "Order"
         ],
+        "summary": "주문 생성",
+        "description": "로그인 한 사용자가 주문을 생성합니다.",
         "operationId": "createOrder",
         "requestBody": {
           "content": {
@@ -162,8 +188,10 @@
     "/auth/sign": {
       "post": {
         "tags": [
-          "user-controller"
+          "User"
         ],
+        "summary": "회원가입",
+        "description": "회원가입을 진행합니다.",
         "operationId": "signUp",
         "requestBody": {
           "content": {
@@ -202,8 +230,10 @@
     "/auth/login": {
       "post": {
         "tags": [
-          "user-controller"
+          "User"
         ],
+        "summary": "로그인",
+        "description": "로그인을 진행합니다.",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -242,8 +272,10 @@
     "/products/selling": {
       "get": {
         "tags": [
-          "product-controller"
+          "Product"
         ],
+        "summary": "판매중인 상품 조회",
+        "description": "판매중인 상품들을 필터링하여 목록으로 반환합니다.",
         "operationId": "getSellingProducts",
         "responses": {
           "200": {
@@ -272,8 +304,10 @@
     "/products/selling/{type}": {
       "get": {
         "tags": [
-          "product-controller"
+          "Product"
         ],
+        "summary": "판매중인 상품 중 타입별로 조회",
+        "description": "판매중인 상품들을 필터링하고 타입별로 핕터링하여 목록으로 반환합니다.",
         "operationId": "getSellingProductsType",
         "parameters": [
           {
@@ -494,7 +528,6 @@
         },
         "required": [
           "name",
-          "price",
           "sellingStatus",
           "type"
         ]
