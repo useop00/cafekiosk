@@ -2,7 +2,7 @@ package hello.kiosk.service.stock
 
 import hello.kiosk.domain.stock.Stock
 import hello.kiosk.repository.StockRepository
-import hello.kiosk.service.stock.request.StockCreateRequest
+import hello.kiosk.service.stock.request.StockCreateServiceRequest
 import hello.kiosk.service.stock.response.StockResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +14,7 @@ class StockService(
 ) {
 
     @Transactional
-    fun upsertStock(request: StockCreateRequest): StockResponse {
+    fun upsertStock(request: StockCreateServiceRequest): StockResponse {
         val stock = stockRepository.findByProductNumber(request.productNumber)
 
         return if (stock == null) {

@@ -1,5 +1,6 @@
 package hello.kiosk.domain.orderProduct
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import hello.kiosk.domain.BaseEntity
 import hello.kiosk.domain.order.Order
 import hello.kiosk.domain.product.Product
@@ -12,12 +13,13 @@ class OrderProduct(
     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     var order: Order,
 
     @ManyToOne(fetch = FetchType.LAZY)
     var product: Product,
 
-    var quantity: Int = 1
+    var quantity: Int
 
 ):BaseEntity(){
     companion object{

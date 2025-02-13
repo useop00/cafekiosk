@@ -1,8 +1,9 @@
 package hello.kiosk.controller.order
 
 import hello.kiosk.controller.ApiResponse
+import hello.kiosk.controller.order.request.OrderRequest
 import hello.kiosk.service.order.OrderService
-import hello.kiosk.service.order.request.OrderRequest
+import hello.kiosk.service.order.request.OrderServiceRequest
 import hello.kiosk.service.order.response.OrderResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,7 +23,7 @@ class OrderController (
                     requestHttp: HttpServletRequest
     ): ApiResponse<OrderResponse> {
         val username = findUsernameFrom(requestHttp)
-        return ApiResponse.ok(orderService.createOrder(request, LocalDateTime.now(), username))
+        return ApiResponse.ok(orderService.createOrder(request.toServiceRequest(), LocalDateTime.now(), username))
     }
 
 

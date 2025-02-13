@@ -10,7 +10,7 @@ import hello.kiosk.repository.OrderRepository
 import hello.kiosk.repository.ProductRepository
 import hello.kiosk.repository.StockRepository
 import hello.kiosk.repository.UserRepository
-import hello.kiosk.service.order.request.OrderRequest
+import hello.kiosk.service.order.request.OrderServiceRequest
 import hello.kiosk.service.order.response.OrderResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +25,7 @@ class OrderService(
 ) {
 
     @Transactional
-    fun createOrder(request: OrderRequest, registeredDateTime: LocalDateTime, username: String): OrderResponse {
+    fun createOrder(request: OrderServiceRequest, registeredDateTime: LocalDateTime, username: String): OrderResponse {
         val productNumber = request.productNumber
         val products = findProductsBy(productNumber)
 

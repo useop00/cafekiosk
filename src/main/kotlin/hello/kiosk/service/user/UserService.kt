@@ -4,8 +4,8 @@ import hello.kiosk.config.JwtProvider
 import hello.kiosk.config.PasswordUtil
 import hello.kiosk.domain.user.User
 import hello.kiosk.repository.UserRepository
-import hello.kiosk.service.user.request.LoginRequest
-import hello.kiosk.service.user.request.SignRequest
+import hello.kiosk.service.user.request.LoginServiceRequest
+import hello.kiosk.service.user.request.SignServiceRequest
 import hello.kiosk.service.user.response.LoginResponse
 import hello.kiosk.service.user.response.UserResponse
 import org.springframework.stereotype.Service
@@ -16,7 +16,7 @@ class UserService(
     private val jwtProvider: JwtProvider
 ) {
 
-    fun signUp(request: SignRequest): UserResponse {
+    fun signUp(request: SignServiceRequest): UserResponse {
         val salt = PasswordUtil.generateSalt()
         val hashPassword = PasswordUtil.hashPassword(request.password, salt)
 
@@ -25,7 +25,7 @@ class UserService(
         return UserResponse.of(user)
     }
 
-    fun login(request: LoginRequest): LoginResponse {
+    fun login(request: LoginServiceRequest): LoginResponse {
         val user = userRepository.findByUsername(request.username) ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
 
 
@@ -38,7 +38,7 @@ class UserService(
     }
 
     private fun isNotEqualsPassword(
-        request: LoginRequest,
+        request: LoginServiceRequest,
         user: User
     ) = !PasswordUtil.verifyPassword(request.password, user.salt, user.password)
 

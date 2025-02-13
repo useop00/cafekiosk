@@ -1,10 +1,8 @@
 package hello.kiosk.service.product
 
 import hello.kiosk.domain.product.ProductSellingStatus.Companion.forDisplay
-import hello.kiosk.domain.stock.Stock
 import hello.kiosk.repository.ProductRepository
-import hello.kiosk.repository.StockRepository
-import hello.kiosk.service.product.request.ProductCreateRequest
+import hello.kiosk.service.product.request.ProductCreateServiceRequest
 import hello.kiosk.service.product.response.ProductResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +14,7 @@ class ProductService(
 ) {
 
     @Transactional
-    fun saveProduct(request: ProductCreateRequest): ProductResponse {
+    fun saveProduct(request: ProductCreateServiceRequest): ProductResponse {
         val prefix = request.type.prefix
         val nextProductNumber = createNextProductNumber(prefix)
 

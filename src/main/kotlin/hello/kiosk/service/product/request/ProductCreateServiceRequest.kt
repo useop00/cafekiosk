@@ -4,7 +4,7 @@ import hello.kiosk.domain.product.Product
 import hello.kiosk.domain.product.ProductSellingStatus
 import hello.kiosk.domain.product.ProductType
 
-data class ProductCreateRequest(
+data class ProductCreateServiceRequest(
 
     val type: ProductType,
     val sellingStatus: ProductSellingStatus,

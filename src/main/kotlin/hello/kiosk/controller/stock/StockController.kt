@@ -1,8 +1,9 @@
 package hello.kiosk.controller.stock
 
 import hello.kiosk.controller.ApiResponse
+import hello.kiosk.controller.stock.request.StockCreateRequest
 import hello.kiosk.service.stock.StockService
-import hello.kiosk.service.stock.request.StockCreateRequest
+import hello.kiosk.service.stock.request.StockCreateServiceRequest
 import hello.kiosk.service.stock.response.StockResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,7 +19,7 @@ class StockController (
 
     @PostMapping
     fun createStock(@RequestBody request: StockCreateRequest): ApiResponse<StockResponse> {
-        return ApiResponse.ok(stockService.upsertStock(request))
+        return ApiResponse.ok(stockService.upsertStock(request.toServiceRequest()))
     }
 
     @GetMapping

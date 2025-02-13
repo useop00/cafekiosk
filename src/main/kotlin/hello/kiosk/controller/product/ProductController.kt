@@ -1,8 +1,9 @@
 package hello.kiosk.controller.product
 
 import hello.kiosk.controller.ApiResponse
+import hello.kiosk.controller.product.request.ProductCreateRequest
 import hello.kiosk.service.product.ProductService
-import hello.kiosk.service.product.request.ProductCreateRequest
+import hello.kiosk.service.product.request.ProductCreateServiceRequest
 import hello.kiosk.service.product.response.ProductResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,7 +19,7 @@ class ProductController (
 ) {
     @PostMapping
     fun createProduct(@RequestBody request: ProductCreateRequest): ApiResponse<ProductResponse> {
-        return ApiResponse.ok(productService.saveProduct(request))
+        return ApiResponse.ok(productService.saveProduct(request.toServiceRequest()))
     }
 
     @GetMapping("/selling")
