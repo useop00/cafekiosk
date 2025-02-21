@@ -1,23 +1,20 @@
 package hello.kiosk.service.user
 
+import hello.kiosk.IntegrationTestSupport
 import hello.kiosk.repository.UserRepository
 import hello.kiosk.service.user.request.LoginServiceRequest
 import hello.kiosk.service.user.request.SignServiceRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.transaction.annotation.Transactional
 import kotlin.test.Test
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("test")
+
 class UserServiceTest @Autowired constructor(
     private val userService: UserService,
     private val userRepository: UserRepository
-) {
+
+) : IntegrationTestSupport() {
     private val username = "wss3325"
     private val password = "1234"
 

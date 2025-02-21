@@ -1,5 +1,6 @@
 package hello.kiosk.service.stock
 
+import hello.kiosk.IntegrationTestSupport
 import hello.kiosk.domain.product.Product
 import hello.kiosk.domain.product.ProductSellingStatus.SELLING
 import hello.kiosk.domain.product.ProductType.BOTTLE
@@ -11,19 +12,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.DisplayName
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.transaction.annotation.Transactional
 import kotlin.test.Test
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("test")
 class StockServiceTest @Autowired constructor(
     private val stockService: StockService,
     private val stockRepository: StockRepository,
     private val productRepository: ProductRepository
-) {
+
+): IntegrationTestSupport() {
 
     @DisplayName("재고가 없으면 새로 생성한다.")
     @Test

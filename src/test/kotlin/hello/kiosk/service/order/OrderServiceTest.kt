@@ -1,5 +1,6 @@
 package hello.kiosk.service.order
 
+import hello.kiosk.IntegrationTestSupport
 import hello.kiosk.domain.product.Product
 import hello.kiosk.domain.product.ProductSellingStatus.SELLING
 import hello.kiosk.domain.product.ProductType
@@ -9,39 +10,34 @@ import hello.kiosk.exception.NotFoundProduct
 import hello.kiosk.exception.OutOfStock
 import hello.kiosk.repository.ProductRepository
 import hello.kiosk.repository.StockRepository
-import hello.kiosk.service.order.request.OrderRequest
+import hello.kiosk.service.order.request.OrderServiceRequest
 import hello.kiosk.service.user.UserService
-import hello.kiosk.service.user.request.LoginRequest
-import hello.kiosk.service.user.request.SignRequest
+import hello.kiosk.service.user.request.LoginServiceRequest
+import hello.kiosk.service.user.request.SignServiceRequest
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.groups.Tuple.*
+import org.assertj.core.groups.Tuple.tuple
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("test")
 class OrderServiceTest @Autowired constructor(
     private val orderService: OrderService,
     private val stockRepository: StockRepository,
     private val productRepository: ProductRepository,
     private val userService: UserService
-) {
+
+) : IntegrationTestSupport() {
     lateinit var username: String
     lateinit var token: String
 
     @BeforeEach
     fun setUp() {
-        val signUpRequest = SignRequest(username = "wss3325", password = "1234")
+        val signUpRequest = SignServiceRequest(username = "wss3325", password = "1234")
         userService.signUp(signUpRequest)
 
-        val loginRequest = LoginRequest(username = signUpRequest.username, password = signUpRequest.password)
+        val loginRequest = LoginServiceRequest(username = signUpRequest.username, password = signUpRequest.password)
         val loginResponse = userService.login(loginRequest)
 
         username = signUpRequest.username
@@ -57,7 +53,7 @@ class OrderServiceTest @Autowired constructor(
         productRepository.saveAll(listOf(product1, product2, product3))
 
 
-        val orderRequest = OrderRequest(
+        val orderRequest = OrderServiceRequest(
             productNumber = listOf("A-001", "A-002"),
             productQuantities = mapOf(
                 "A-001" to 2,
@@ -81,7 +77,7 @@ class OrderServiceTest @Autowired constructor(
     @Test
     fun `찾을 수 없는 상품이면 예외를 던진다`() {
         //given
-        val orderRequest = OrderRequest(
+        val orderRequest = OrderServiceRequest(
             productNumber = listOf("A-001"),
             productQuantities = mapOf("A-001" to 1)
         )
@@ -108,7 +104,7 @@ class OrderServiceTest @Autowired constructor(
         stockRepository.saveAll(listOf(stock1, stock2))
 
 
-        val orderRequest = OrderRequest(
+        val orderRequest = OrderServiceRequest(
             productNumber = listOf("A-001", "B-001", "C-001"),
             productQuantities = mapOf(
                 "A-001" to 1,
@@ -144,7 +140,7 @@ class OrderServiceTest @Autowired constructor(
         val product = createProduct("B-001", BOTTLE, 3000)
         productRepository.save(product)
 
-        val orderRequest = OrderRequest(
+        val orderRequest = OrderServiceRequest(
             productNumber = listOf("B-001"),
             productQuantities = mapOf(
                 "B-001" to 1
@@ -160,7 +156,7 @@ class OrderServiceTest @Autowired constructor(
 
     }
 
-    private fun createProduct(productNumber: String, type:ProductType, price:Int) = Product.create(
+    private fun createProduct(productNumber: String, type: ProductType, price: Int) = Product.create(
         productNumber = productNumber,
         type = type,
         sellingStatus = SELLING,

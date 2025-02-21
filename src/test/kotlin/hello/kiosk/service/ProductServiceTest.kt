@@ -1,5 +1,6 @@
 package hello.kiosk.service
 
+import hello.kiosk.IntegrationTestSupport
 import hello.kiosk.domain.product.Product
 import hello.kiosk.domain.product.ProductSellingStatus
 import hello.kiosk.domain.product.ProductSellingStatus.SELLING
@@ -9,22 +10,17 @@ import hello.kiosk.domain.product.ProductType.*
 import hello.kiosk.repository.ProductRepository
 import hello.kiosk.service.product.ProductService
 import hello.kiosk.service.product.request.ProductCreateServiceRequest
-import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("test")
 class ProductServiceTest @Autowired constructor(
     private var productRepository: ProductRepository,
     private var productService: ProductService
-) {
+
+) : IntegrationTestSupport() {
 
     @DisplayName("상품을 저장한다.")
     @Test
@@ -61,9 +57,9 @@ class ProductServiceTest @Autowired constructor(
     @Test
     fun findSellingProducts() {
         //given
-        val product1 = createProduct("A-001",COFFEE, SELLING, "아메리카노", 3000)
-        val product2 = createProduct("B-001",BOTTLE, SELLING, "콜라", 5000)
-        val product3 = createProduct("C-001",DESSERT, SOLD_OUT, "치즈케이크", 7000)
+        val product1 = createProduct("A-001", COFFEE, SELLING, "아메리카노", 3000)
+        val product2 = createProduct("B-001", BOTTLE, SELLING, "콜라", 5000)
+        val product3 = createProduct("C-001", DESSERT, SOLD_OUT, "치즈케이크", 7000)
         productRepository.saveAll(listOf(product1, product2, product3))
 
         //when
@@ -71,10 +67,10 @@ class ProductServiceTest @Autowired constructor(
 
         //then
         assertThat(sellingProducts).hasSize(2)
-            .extracting("productNumber","type", "sellingStatus", "name", "price")
+            .extracting("productNumber", "type", "sellingStatus", "name", "price")
             .containsExactlyInAnyOrder(
-                tuple("A-001",COFFEE, SELLING, "아메리카노", 3000),
-                tuple("B-001",BOTTLE, SELLING, "콜라", 5000)
+                tuple("A-001", COFFEE, SELLING, "아메리카노", 3000),
+                tuple("B-001", BOTTLE, SELLING, "콜라", 5000)
             )
     }
 
@@ -160,9 +156,9 @@ class ProductServiceTest @Autowired constructor(
     @Test
     fun findPrefixProducts() {
         //given
-        val product1 = createProduct("A-001",COFFEE, SELLING, "아메리카노", 3000)
-        val product2 = createProduct("A-002",BOTTLE, SELLING, "카페라떼", 5000)
-        val product3 = createProduct("C-001",DESSERT, SOLD_OUT, "치즈케이크", 7000)
+        val product1 = createProduct("A-001", COFFEE, SELLING, "아메리카노", 3000)
+        val product2 = createProduct("A-002", BOTTLE, SELLING, "카페라떼", 5000)
+        val product3 = createProduct("C-001", DESSERT, SOLD_OUT, "치즈케이크", 7000)
         productRepository.saveAll(listOf(product1, product2, product3))
 
         //when
@@ -170,10 +166,10 @@ class ProductServiceTest @Autowired constructor(
 
         //then
         assertThat(products).hasSize(2)
-            .extracting("productNumber","type", "sellingStatus", "name", "price")
+            .extracting("productNumber", "type", "sellingStatus", "name", "price")
             .containsExactlyInAnyOrder(
-                tuple("A-001",COFFEE, SELLING, "아메리카노", 3000),
-                tuple("A-002",BOTTLE, SELLING, "카페라떼", 5000)
+                tuple("A-001", COFFEE, SELLING, "아메리카노", 3000),
+                tuple("A-002", BOTTLE, SELLING, "카페라떼", 5000)
             )
     }
 

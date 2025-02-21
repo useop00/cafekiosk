@@ -1,24 +1,23 @@
 package hello.kiosk.repository
 
+import hello.kiosk.IntegrationTestSupport
 import hello.kiosk.domain.product.Product
 import hello.kiosk.domain.product.ProductSellingStatus
 import hello.kiosk.domain.product.ProductSellingStatus.SELLING
 import hello.kiosk.domain.product.ProductSellingStatus.SOLD_OUT
 import hello.kiosk.domain.product.ProductType
 import hello.kiosk.domain.product.ProductType.*
-import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-@Transactional
+
 class ProductRepositoryTest @Autowired constructor(
     private var productRepository: ProductRepository
-) {
+
+) : IntegrationTestSupport() {
 
     @DisplayName("원하는 판매상태를 가진 상품들을 조회한다.")
     @Test
