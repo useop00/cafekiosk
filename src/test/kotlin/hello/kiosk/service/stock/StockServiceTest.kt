@@ -1,12 +1,12 @@
 package hello.kiosk.service.stock
 
 import hello.kiosk.domain.product.Product
-import hello.kiosk.domain.product.ProductSellingStatus.*
-import hello.kiosk.domain.product.ProductType.*
+import hello.kiosk.domain.product.ProductSellingStatus.SELLING
+import hello.kiosk.domain.product.ProductType.BOTTLE
 import hello.kiosk.domain.stock.Stock
 import hello.kiosk.repository.ProductRepository
 import hello.kiosk.repository.StockRepository
-import hello.kiosk.service.stock.request.StockCreateRequest
+import hello.kiosk.service.stock.request.StockCreateServiceRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.DisplayName
@@ -32,7 +32,7 @@ class StockServiceTest @Autowired constructor(
         val product = createProduct()
         productRepository.save(product)
 
-        val request = StockCreateRequest(
+        val request = StockCreateServiceRequest(
             productNumber = product.productNumber,
             quantity = 10
         )
@@ -55,7 +55,7 @@ class StockServiceTest @Autowired constructor(
         val stock = Stock.create(product.productNumber, 5)
         stockRepository.save(stock)
 
-        val request = StockCreateRequest(
+        val request = StockCreateServiceRequest(
             productNumber = product.productNumber,
             quantity = 10
         )
@@ -81,11 +81,11 @@ class StockServiceTest @Autowired constructor(
         )
         productRepository.saveAll(listOf(product1, product2))
 
-        val request1 = StockCreateRequest(
+        val request1 = StockCreateServiceRequest(
             productNumber = product1.productNumber,
             quantity = 10
         )
-        val request2 = StockCreateRequest(
+        val request2 = StockCreateServiceRequest(
             productNumber = product2.productNumber,
             quantity = 5
         )

@@ -7,7 +7,8 @@ import hello.kiosk.domain.product.ProductSellingStatus.SOLD_OUT
 import hello.kiosk.domain.product.ProductType
 import hello.kiosk.domain.product.ProductType.*
 import jakarta.transaction.Transactional
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,8 +36,8 @@ class ProductRepositoryTest @Autowired constructor(
         assertThat(products).hasSize(2)
             .extracting("productNumber", "name", "price")
             .containsExactlyInAnyOrder(
-                tuple("001", "아메리카노", 3000),
-                tuple("002", "카페라떼", 5000)
+                tuple("A-001", "아메리카노", 3000),
+                tuple("B-001", "카페라떼", 5000)
             )
 
     }
