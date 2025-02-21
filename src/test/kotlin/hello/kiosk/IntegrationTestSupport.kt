@@ -7,5 +7,4 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-abstract class IntegrationTestSupport {
-}
+abstract class IntegrationTestSupport {}
