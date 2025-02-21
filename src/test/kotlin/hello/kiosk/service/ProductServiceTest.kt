@@ -7,9 +7,8 @@ import hello.kiosk.domain.product.ProductSellingStatus.SOLD_OUT
 import hello.kiosk.domain.product.ProductType
 import hello.kiosk.domain.product.ProductType.*
 import hello.kiosk.repository.ProductRepository
-import hello.kiosk.repository.StockRepository
-import hello.kiosk.service.product.request.ProductCreateRequest
 import hello.kiosk.service.product.ProductService
+import hello.kiosk.service.product.request.ProductCreateServiceRequest
 import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
@@ -34,7 +33,7 @@ class ProductServiceTest @Autowired constructor(
         val product1 = createProduct("A-001", COFFEE, SELLING, "아메리카노", 3000)
         productRepository.save(product1)
 
-        val request = ProductCreateRequest(
+        val request = ProductCreateServiceRequest(
             type = BOTTLE,
             sellingStatus = SELLING,
             name = "카페라떼",
@@ -88,7 +87,7 @@ class ProductServiceTest @Autowired constructor(
         productRepository.saveAll(listOf(product1, product2))
 
         //when
-        val request = ProductCreateRequest(
+        val request = ProductCreateServiceRequest(
             type = DESSERT,
             sellingStatus = SELLING,
             name = "치즈케이크",
@@ -111,7 +110,7 @@ class ProductServiceTest @Autowired constructor(
         productRepository.saveAll(listOf(product1, product2))
 
         //when
-        val request = ProductCreateRequest(
+        val request = ProductCreateServiceRequest(
             type = COFFEE,
             sellingStatus = SELLING,
             name = "콜드브루",
@@ -128,14 +127,14 @@ class ProductServiceTest @Autowired constructor(
     @Test
     fun firstProductNumber() {
         //given
-        val request1 = ProductCreateRequest(
+        val request1 = ProductCreateServiceRequest(
             type = COFFEE,
             sellingStatus = SELLING,
             name = "아메리카노",
             price = 3000
         )
 
-        val request2 = ProductCreateRequest(
+        val request2 = ProductCreateServiceRequest(
             type = BOTTLE,
             sellingStatus = SELLING,
             name = "콜라",
