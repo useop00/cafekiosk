@@ -1,16 +1,14 @@
 package hello.kiosk.service.user
 
-import hello.kiosk.config.PasswordUtil
 import hello.kiosk.repository.UserRepository
-import hello.kiosk.service.user.request.LoginRequest
-import hello.kiosk.service.user.request.SignRequest
-import org.assertj.core.api.Assertions.*
+import hello.kiosk.service.user.request.LoginServiceRequest
+import hello.kiosk.service.user.request.SignServiceRequest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
-import kotlin.math.log
 import kotlin.test.Test
 
 @SpringBootTest
@@ -26,7 +24,7 @@ class UserServiceTest @Autowired constructor(
     @Test
     fun sign() {
         //given
-        val request = SignRequest(username = username, password = password)
+        val request = SignServiceRequest(username = username, password = password)
 
         //when
         val response = userService.signUp(request)
@@ -41,10 +39,10 @@ class UserServiceTest @Autowired constructor(
     @Test
     fun successLogin() {
         //given
-        val request = SignRequest(username = username, password = password)
+        val request = SignServiceRequest(username = username, password = password)
         userService.signUp(request)
 
-        val loginRequest = LoginRequest(username = username, password = password)
+        val loginRequest = LoginServiceRequest(username = username, password = password)
 
         //when
         val response = userService.login(loginRequest)
@@ -56,10 +54,10 @@ class UserServiceTest @Autowired constructor(
     @Test
     fun failedLogin() {
         //given
-        val request = SignRequest(username = username, password = password)
+        val request = SignServiceRequest(username = username, password = password)
         userService.signUp(request)
 
-        val loginRequest = LoginRequest(username = username, password = "3333")
+        val loginRequest = LoginServiceRequest(username = username, password = "3333")
 
         //when & then
         val exception = assertThrows<IllegalArgumentException> {
