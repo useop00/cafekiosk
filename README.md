@@ -2,7 +2,7 @@
 
 이 프로젝트는 카페 키오스크 API를 제공하기 위한 Spring Boot + Kotlin 애플리케이션입니다.
 
-- [API 문서 바로가기](https://useop00.github.io/cafekiosk/)
+- [API 문서 바로가기](https://wooosup.github.io/cafekiosk/)
 
 ---
 
